@@ -1,0 +1,10 @@
+# Pinned versions verified on NVIDIA H20/A100 (driver 535/470, CUDA<=12.x compat).
+# torch MUST stay at 2.4.1 on our machines; newer wheels from internal mirrors break CUDA.
+torch==2.4.1
+torchvision==0.19.1
+nnunetv2==2.8.1
+cc3d
+scipy
+nibabel
+SimpleITK
+scikit-learn
