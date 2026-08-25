@@ -4,6 +4,17 @@
 > 5-fold out-of-fold (OOF) evaluation on the training set (n=1453), threshold 0.5,
 > no post-processing.
 
+## Submitted configuration vs evaluated variant
+
+- **Submitted (test phase): 4-model ensemble** — nnUNet + MedNeXt-S-k3 + MedNeXt-B-k3
+  + ResEnc-M. OOF: Dice 0.6662, AVD 5.02 mL, ALCD 1.85, Lesion-F1 0.6829, PR-AUC 0.7715.
+- **Evaluated variant (not submitted): 5-model ensemble** — the above plus ResEnc-L.
+  OOF: Dice 0.6660, AVD 4.95 mL, ALCD 1.82, Lesion-F1 0.6852, PR-AUC 0.7729; best
+  5-metric rank-sum (1.60 vs 2.80). It was excluded from the submission because the
+  ResEnc-L model (160×192×160 patch) exceeded available GPU memory at test-time
+  inference. Both pipelines are provided (`inference/predict_ensemble.sh`, and the
+  same with `INCLUDE_RESENC_L=1`).
+
 ## Framework
 
 Everything runs inside nnU-Net v2 (2.8.1): automatic fingerprint/plan generation,
@@ -41,10 +52,10 @@ epochs; the checkpoint with the best validation EMA foreground Dice
    (nnU-Net averages softmax over folds). Mirroring/TTA disabled — measured
    ΔPR-AUC ≈ −0.001 on OOF, i.e. no gain (the exported probabilities already
    average the default nnU-Net mirroring behaviour; extra explicit TTA did not help).
-2. Cross-model: `nnUNetv2_ensemble` over the 5 model folders (equal weights).
-   All members share the same preprocessed target grid, so probability maps are
-   averaged directly; argmax of the averaged softmax ≡ threshold 0.5 for the
-   binary case.
+2. Cross-model: `nnUNetv2_ensemble` over the 4 submitted model folders (or all 5 for
+   the variant; equal weights). All members share the same preprocessed target grid,
+   so probability maps are averaged directly; argmax of the averaged softmax ≡
+   threshold 0.5 for the binary case.
 3. No connected-component filtering: ATLAS lesions are frequently multifocal, and
    component-size/count filtering reduced Dice in OOF evaluation — deliberately
    omitted.
